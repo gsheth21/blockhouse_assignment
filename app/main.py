@@ -30,10 +30,6 @@ def startup():
             if retries == 0:
                 raise RuntimeError("Failed to connect to database") from e
 
-@app.get("/gym")
-def get_gym():
-    return {"message": "List of orders"}
-
 @app.post("/orders", response_model=Order)
 def create_order(order: OrderCreate, db: Session = Depends(get_db)):
     db_order = OrderDB(**order.dict())
