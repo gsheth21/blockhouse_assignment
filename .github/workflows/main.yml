@@ -35,9 +35,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Debug workspace
+      - name: Write SSH key to file
         run: |
-          ls -la
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/gaurav_blockhouse.pem
+          chmod 600 ~/.ssh/gaurav_blockhouse.pem
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
@@ -48,13 +50,13 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: .  # Use the root directory as the build context
+          context: .
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/orders-api:latest
 
       - name: Copy docker-compose.yml to EC2
         run: |
-          scp -i ${{ secrets.EC2_SSH_KEY }} ./docker-compose.yml ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/myapp/docker-compose.yml
+          scp -i ~/.ssh/gaurav_blockhouse.pem ./docker-compose.yml ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/myapp/docker-compose.yml
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
