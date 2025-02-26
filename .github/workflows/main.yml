@@ -56,7 +56,7 @@ jobs:
 
       - name: Copy docker-compose.yml to EC2
         run: |
-          scp -i ${{ secrets.EC2_SSH_KEY }} ./docker-compose.yml ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/myapp/docker-compose.yml
+          scp -i ~/.ssh/gaurav_blockhouse.pem ./docker-compose.yml ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/myapp/docker-compose.yml
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
