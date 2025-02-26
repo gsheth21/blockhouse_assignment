@@ -50,13 +50,13 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
         with:
-          context: .
-          push: true
+          context: .  # Build context (root of the repository)
+          push: true  # Push the image to Docker Hub
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/orders-api:latest
 
       - name: Copy docker-compose.yml to EC2
         run: |
-          scp -o StrictHostKeyChecking=no -i ~/.ssh/gaurav_blockhouse.pem ./docker-compose.yml ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/myapp/docker-compose.yml
+          scp -o StrictHostKeyChecking=no -i ~/.ssh/gaurav_blockhouse.pem ./docker-compose.yml ec2-user@${{ secrets.EC2_HOST }}:/home/ec2-user/myapp/
 
       - name: Deploy to EC2
         uses: appleboy/ssh-action@master
