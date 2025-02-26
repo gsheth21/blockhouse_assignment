@@ -55,5 +55,6 @@ jobs:
         username: ec2-user
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
-          docker-compose -f /path/to/docker-compose.yml pull app
-          docker-compose -f /path/to/docker-compose.yml up -d
+          cd /home/ec2-user/myapp
+          docker-compose -f docker-compose.yml pull app
+          docker-compose -f docker-compose.yml up -d
