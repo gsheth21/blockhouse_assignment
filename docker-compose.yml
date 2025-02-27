@@ -1,6 +1,6 @@
 services:
   app:
-    build: .
+    image: gauravsheth01/orders-api:latest
     container_name: orders-api
     ports:
       - "8000:8000"
