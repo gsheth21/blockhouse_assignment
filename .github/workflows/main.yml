@@ -68,9 +68,9 @@ jobs:
             echo "Installing Docker..."
             sudo apt-get update -y
             sudo apt-get install docker -y
-            sudo service docker start
+            sudo systemctl start docker
             sudo systemctl enable docker
-            sudo usermod -a -G docker ubuntu
+            sudo usermod -aG docker ubuntu
 
             echo "Installing Docker Compose..."
             sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
