@@ -31,13 +31,17 @@ Visit at: http://ec2-3-144-1-48.us-east-2.compute.amazonaws.com:8000/orders
 
 ### Prerequisites
 - Docker & Docker Compose
-- Python 3.10+ or Go 1.20+
+- Python 3.9
+- Packages listed in requirements.txt
+```bash
+pip install -r requirements.txt
+```
 
 ### Local Setup
 Clone the repository:
 ```bash
-git clone https://github.com/yourusername/trade-order-service.git
-cd trade-order-service
+git clone https://github.com/gsheth21/blockhouse_assignment
+cd blockhouse_assignment
 ```
 
 Start the services with Docker Compose:
@@ -75,8 +79,11 @@ docker-compose docker-compose.yml up -d
 ## CI/CD Pipeline
 ### GitHub Actions Workflow:
 Tests are run on pull requests.
+
 On merging to main, the Docker image is built, pushed to dockerhub and deployed via SSH.
+
 Pre-built Image: gauravsheth01/orders-api:latest
+
 Secrets used: DOCKERHUB_USERNAME, DOCKERHUB_TOKEN, EC2_HOST, EC2_SSH_KEY
 
 ## Testing
