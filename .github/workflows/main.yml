@@ -66,8 +66,8 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             echo "Installing Docker..."
-            sudo yum update -y
-            sudo yum install docker -y
+            sudo apt-get update -y
+            sudo apt-get install docker -y
             sudo service docker start
             sudo systemctl enable docker
             sudo usermod -a -G docker ubuntu
