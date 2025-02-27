@@ -82,5 +82,5 @@ jobs:
 
             echo "Deploying to EC2..."
             cd /home/ubuntu
-            docker-compose -f docker-compose.yml pull
-            docker-compose -f docker-compose.yml up -d
+            sudo docker-compose -f docker-compose.yml pull
+            sudo docker-compose -f docker-compose.yml up -d
