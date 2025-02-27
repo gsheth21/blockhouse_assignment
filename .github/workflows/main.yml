@@ -65,6 +65,17 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
+            echo "Installing Docker..."
+            sudo yum update -y
+            sudo yum install docker -y
+            sudo service docker start
+            sudo systemctl enable docker
+            sudo usermod -a -G docker ec2-user
+
+            echo "Installing Docker Compose..."
+            sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+            sudo chmod +x /usr/local/bin/docker-compose
+
             echo "Deploying to EC2..."
             cd /home/ec2-user/myapp
             docker-compose -f docker-compose.yml pull
