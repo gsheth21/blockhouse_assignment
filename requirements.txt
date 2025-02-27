@@ -3,3 +3,4 @@ uvicorn[standard]==0.22.0
 sqlmodel==0.0.8
 sqlalchemy==1.4.41
 pytest==7.4.3
+httpx==0.25.1
