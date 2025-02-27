@@ -5,8 +5,8 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - .:/app  # Mount the project directory to /app inside the container
-      - ./prod.db:/app/prod.db  # Map prod.db directly to the container's /app directory
+      - .:$HOME  # Mount the project directory to /app inside the container
+      - ./prod.db:$HOME/prod.db  # Map prod.db directly to the container's /app directory
     environment:
       - DATABASE_URL=sqlite:///app/prod.db  # Point the app to prod.db inside /app
     depends_on:
