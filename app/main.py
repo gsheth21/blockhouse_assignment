@@ -1,52 +1,48 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
-from app.schemas import OrderCreate, Order
-from app.database import get_db, SessionLocal
-from app.models import Base, OrderDB
-from sqlalchemy.orm import Session
-from fastapi.middleware.cors import CORSMiddleware
-import os
+from typing import Annotated
+
+from fastapi import Depends, FastAPI, HTTPException, Query
+from sqlmodel import Field, Session, SQLModel, create_engine, select
+
+class Order(SQLModel, table=True):
+    id: int = Field(default=None, primary_key=True)
+    symbol: str = Field(index=True)
+    price: float = Field(index=True)
+    quantity: int = Field(index=True)
+    order_type: str = Field(index=True)
+
+sqlite_file_name = "prod.db"
+sqlite_url = f"sqlite:///./{sqlite_file_name}"
+
+connect_args = {"check_same_thread": False}
+engine = create_engine(sqlite_url, connect_args=connect_args)
+
+def create_db_and_tables():
+    SQLModel.metadata.create_all(engine)
+
+def get_session():
+    with Session(engine) as session:
+        yield session
+
+SessionDep = Annotated[Session, Depends(get_session)]
 
 app = FastAPI()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
 @app.on_event("startup")
-def startup():
-    retries = 5
-    while retries > 0:
-        try:
-            db = SessionLocal()
-            Base.metadata.create_all(bind=db.get_bind())
-            db.close()
-            break
-        except Exception as e:
-            retries -= 1
-            time.sleep(5)
-            if retries == 0:
-                raise RuntimeError("Failed to connect to database") from e
+def on_startup():
+    create_db_and_tables()
 
-@app.post("/orders", response_model=Order)
-def create_order(order: OrderCreate, db: Session = Depends(get_db)):
-    db_order = OrderDB(**order.dict())
-    db.add(db_order)
-    db.commit()
-    db.refresh(db_order)
-    return db_order
+@app.post("/orders/")
+def createOrder(order: Order, session: SessionDep) -> Order:
+    session.add(order)
+    session.commit()
+    session.refresh(order)
+    return order
 
-@app.get("/orders", response_model=list[Order])
-def read_orders(db: Session = Depends(get_db)):
-    return db.query(OrderDB).all()
-
-@app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket):
-    await websocket.accept()
-    try:
-        while True:
-            await websocket.receive_text()
-    except WebSocketDisconnect:
-        pass
+@app.get("/orders/")
+def getOrder(
+    session: SessionDep,
+    offset: int = 0,
+    limit: Annotated[int, Query(le=100)] = 100,
+) -> list[Order]:
+    orders = session.exec(select(Order).offset(offset).limit(limit)).all()
+    return orders

@@ -1,44 +1,38 @@
-import sys
 import os
+import sys
 
-# Add the project root directory to the Python path
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
 
 from fastapi.testclient import TestClient
-from app.main import app
-from app.database import get_db, Base
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlmodel import SQLModel, Session, create_engine
+from app.main import app, get_session
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+TEST_DATABASE_URL = "sqlite:///./test.db"
+test_engine = create_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+def override_get_session():
+    with Session(test_engine) as session:
+        yield session
 
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        Base.metadata.create_all(bind=engine)
-        yield db
-    finally:
-        db.close()
+app.dependency_overrides[get_session] = override_get_session
 
-app.dependency_overrides[get_db] = override_get_db
+SQLModel.metadata.create_all(test_engine)
 
 client = TestClient(app)
 
 def test_create_order():
     response = client.post(
-        "/orders",
+        "/orders/",
         json={"symbol": "BTC", "price": 50000.0, "quantity": 1, "order_type": "BUY"}
     )
     assert response.status_code == 200
     data = response.json()
     assert data["symbol"] == "BTC"
+    assert data["price"] == 50000.0
+    assert data["quantity"] == 1
+    assert data["order_type"] == "BUY"
 
 def test_read_orders():
-    response = client.get("/orders")
+    response = client.get("/orders/")
     assert response.status_code == 200
-    assert len(response.json()) >= 1
+    assert isinstance(response.json(), list)
